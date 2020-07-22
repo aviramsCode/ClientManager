@@ -13,6 +13,7 @@ class ClientDetails extends Component {
     showBalanceUpdate: false,
     balanceUpdateAmount: ""
   };
+
   //Update balance
   balanceSubmit = e => {
     e.preventDefault();
@@ -44,6 +45,7 @@ class ClientDetails extends Component {
   render() {
     const { client } = this.props;
     const { showBalanceUpdate, balanceUpdateAmount } = this.state;
+    const { disableBalanceOnEdit } = this.props.settings;
 
     let balanceForm = "";
 
@@ -58,12 +60,14 @@ class ClientDetails extends Component {
               placeholder="Add New Balance"
               value={balanceUpdateAmount}
               onChange={this.onChange}
+              disabled={disableBalanceOnEdit}
             />
             <div className="input-group-append">
               <input
                 type="submit"
                 value="Update"
                 className="btn btn-outline-dark"
+                disabled={disableBalanceOnEdit}
               />
             </div>
           </div>
@@ -156,7 +160,7 @@ class ClientDetails extends Component {
 ClientDetails.propTypes = {
   firestore: PropTypes.object.isRequired
 };
-//to composoe we send two functions
+//we send to composoe two functions
 //1.firestoreConnect, gets an arrow function, arrow func recives props.
 //#collection: specify the collection we want to get data from, in this case we want to get data from clients collection
 //#doc: specify the specific document we want to grab from the collection, we grab the client id from the url using params
@@ -170,6 +174,7 @@ export default compose(
     { collection: "clients", storeAs: "client", doc: props.match.params.id }
   ]),
   connect((state, props) => ({
-    client: state.firestore.ordered.client && state.firestore.ordered.client[0]
+    client: state.firestore.ordered.client && state.firestore.ordered.client[0],
+    settings: state.settings
   }))
 )(ClientDetails);

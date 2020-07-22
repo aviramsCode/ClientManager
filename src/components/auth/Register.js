@@ -7,12 +7,20 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { notifyUser } from "../../actions/notifyActions";
 import Alert from "../layout/Alert";
 
-class Login extends Component {
+class Register extends Component {
   state = {
     email: "",
     password: "",
     error: false
   };
+
+  componentWillMount() {
+    const { allowRegistration } = this.props.settings;
+
+    if (!allowRegistration) {
+      this.props.history.push("/");
+    }
+  }
 
   onSubmit = e => {
     e.preventDefault();
@@ -20,21 +28,15 @@ class Login extends Component {
     const { firebase, notifyUser } = this.props;
     const { email, password, error } = this.state;
 
+    //Register with fb
     firebase
-      .login({
-        email: email,
-        password: password
-      })
-      .then(res => this.setState({ error: false }))
+      .createUser({ email, password })
       .catch(err => this.setState({ error: err.message }));
-    //notifyUser is available to us via the props beacuse we are passing it as an action to a connected component
-    // .catch(err => notifyUser("Invalid email or password", "error"));
   };
 
   onChange = e => {
     this.setState({ [e.target.name]: e.target.value });
   };
-
   render() {
     // const {message, messageType} = this.props.notify;
     const { error } = this.state;
@@ -49,7 +51,7 @@ class Login extends Component {
               {error ? <Alert message={error} messageType={"error"} /> : null}
               <h1 className="text-center pb-4 pt-3">
                 <span className="text-primary">
-                  <FontAwesomeIcon icon="lock" /> Login
+                  <FontAwesomeIcon icon="lock" /> Register
                 </span>
               </h1>
               <form onSubmit={this.onSubmit}>
@@ -77,7 +79,7 @@ class Login extends Component {
                 </div>
                 <input
                   type="submit"
-                  value="Login"
+                  value="Register"
                   className="btn btn-primary btn-block"
                 />
               </form>
@@ -89,7 +91,7 @@ class Login extends Component {
   }
 }
 
-Login.propTypes = {
+Register.propTypes = {
   firebaseConnect: PropTypes.object.isRequired,
   notify: PropTypes.object.isRequired,
   notifyUser: PropTypes.func.isRequired
@@ -99,8 +101,9 @@ export default compose(
   firebaseConnect(),
   connect(
     (state, props) => ({
-      notify: state.notify
+      notify: state.notify,
+      settings: state.settings
     }),
     { notifyUser }
   )
-)(Login);
+)(Register);

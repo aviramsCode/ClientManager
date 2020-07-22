@@ -10,6 +10,8 @@ class AppNavbar extends Component {
     isAuth: false
   };
 
+  //checks if the user have a user id - meaning he is authenticated
+  //auth is avilable to us in props because we maped it from the state vis connect
   static getDerivedStateFromProps(props, state) {
     const { auth } = props;
 
@@ -30,6 +32,7 @@ class AppNavbar extends Component {
   render() {
     const { isAuth } = this.state;
     const { auth } = this.props;
+    const { allowRegistration } = this.props.settings;
     return (
       <nav className="navbar navbar-expand-md navbar-dark bg-primary mb-4">
         <div className="container">
@@ -46,6 +49,7 @@ class AppNavbar extends Component {
           </button>
           <div className="collapse navbar-collapse" id="navbarMain">
             <ul className="navbar-nav mr auto">
+              {/* Dashboard will be showen only if user is authenticated */}
               {isAuth ? (
                 <li className="nav-item">
                   <Link to="/" className="nav-link">
@@ -54,12 +58,19 @@ class AppNavbar extends Component {
                 </li>
               ) : null}
             </ul>
+
+            {/* Logout will be showen only if user is authenticated */}
             {isAuth ? (
               <ul className="navbar-nav ml-auto">
                 <li className="nav-item">
                   <a href="#!" className="nav-link">
                     {auth.email}
                   </a>
+                </li>
+                <li className="nav-item">
+                  <Link to="/settings" className="nav-link">
+                    Settings
+                  </Link>
                 </li>
                 <li className="nav-item">
                   <a
@@ -72,6 +83,20 @@ class AppNavbar extends Component {
                 </li>
               </ul>
             ) : null}
+            {allowRegistration && !isAuth ? (
+              <ul className="navbar-nav ml-auto">
+                <li className="nav-item">
+                  <Link to="/login" className="nav-link">
+                    Login
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link to="/register" className="nav-link">
+                    Register
+                  </Link>
+                </li>
+              </ul>
+            ) : null}
           </div>
         </div>
       </nav>
@@ -81,12 +106,16 @@ class AppNavbar extends Component {
 
 AppNavbar.propTypes = {
   // firebaseConnect: PropTypes.object.isRequired,
-  auth: PropTypes.object.isRequired
+  auth: PropTypes.object.isRequired,
+  settings: PropTypes.object.isRequired
 };
 
 export default compose(
   firebaseConnect(),
+  // firebase is available to us since we use firebaseConnect
+  //connect mapes auth from redux state to props
   connect((state, props) => ({
-    auth: state.firebase.auth
+    auth: state.firebase.auth,
+    settings: state.settings
   }))
 )(AppNavbar);
